@@ -1,0 +1,7 @@
+node_modules/
+failures.json
+ambiguous.json
+incorrect.json
+.idea/
+private/
+src/generated/

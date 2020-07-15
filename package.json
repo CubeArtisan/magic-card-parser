@@ -1,0 +1,43 @@
+{
+  "name": "magic-card-parser",
+  "version": "0.1.0",
+  "description": "A utility for parsing magic cards into a JSON structure for further processing.",
+  "main": "src/magicCardParser.js",
+  "scripts": {
+    "build": "sh nearley/helper.sh",
+    "clean": "rm -r src/generated",
+    "assess": "npm run build && node --max-old-space-size=8192 scripts/assessCardParser.js"
+  },
+  "files": [
+    "src/**/*.js",
+    "README.md"
+  ],
+  "directories": {
+    "lib": "src",
+    "example": "scripts",
+    "test": "__tests__"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ruler501/magic-card-parser.git"
+  },
+  "homepage": "https://github.com/ruler501/magic-card-parser",
+  "bugs": {
+    "url": "https://github.com/ruler501/magic-card-parser/issues",
+    "email": "friends.devon@gmail.com"
+  },
+  "type": "module",
+  "author": {
+    "name": "ruler501",
+    "email": "friends.devon@gmail.com"
+  },
+  "license": "MIT",
+  "keywords": [
+    "mtg",
+    "magic"
+  ],
+  "dependencies": {
+    "nearley": "^2.19.5"
+  },
+  "devDependencies": {}
+}

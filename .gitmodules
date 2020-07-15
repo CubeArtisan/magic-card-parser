@@ -1,0 +1,3 @@
+[submodule "extern/CubeCobra"]
+	path = extern/CubeCobra
+	url = https://github.com/dekkerglen/CubeCobra.git
