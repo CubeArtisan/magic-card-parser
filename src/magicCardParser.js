@@ -47,7 +47,7 @@ const cardToGraphViz = (card) => {
         const edges = [];
         let nextId = myId + 1;
         if (Array.isArray(obj)) {
-            nodes.push({ id: myId, label: 'array' });
+            nodes.push({ id: myId, label: ' ' });
             obj.forEach((elem, index) => {
                 edges.push({ from: myId, to: nextId, label: index.toString() });
                 let newNodes;
@@ -59,7 +59,7 @@ const cardToGraphViz = (card) => {
         } else if (obj === null) {
             nodes.push({ id: myId, label: 'null'});
         } else if (obj.constructor === Object) {
-            nodes.push({ id: myId, label: 'object' });
+            nodes.push({ id: myId, label: ' ' });
             for (const [key, value] of Object.entries(obj)) {
                 edges.push({ from: myId, to: nextId, label: key })
                 let newNodes;
