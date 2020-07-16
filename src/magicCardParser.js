@@ -38,4 +38,57 @@ const parseCard = (card) => {
     return { result, error: null, oracleText, card };
 };
 
-module.exports = { parseCard };
+const cardToGraphViz = (card) => {
+    const { result } = parseCard(card);
+    if (!result) return null;
+
+    function recurse(obj, myId = 1) {
+        const nodes = [];
+        const edges = [];
+        let nextId = myId + 1;
+        if (Array.isArray(obj)) {
+            nodes.push({ id: myId, label: 'array' });
+            obj.forEach((elem, index) => {
+                edges.push({ from: myId, to: nextId, label: index.toString() });
+                let newNodes;
+                let newEdges;
+                [newNodes, newEdges, nextId] = recurse(elem, nextId);
+                nodes.push(...newNodes);
+                edges.push(...newEdges);
+            });
+        } else if (obj === null) {
+            nodes.push({ id: myId, label: 'null'});
+        } else if (obj.constructor === Object) {
+            nodes.push({ id: myId, label: 'object' });
+            for (const [key, value] of Object.entries(obj)) {
+                edges.push({ from: myId, to: nextId, label: key })
+                let newNodes;
+                let newEdges;
+                [newNodes, newEdges, nextId] = recurse(value, nextId);
+                nodes.push(...newNodes);
+                edges.push(...newEdges);
+            }
+        } else {
+            nodes.push({ id: myId, label: obj.toString() });
+        }
+        return [nodes, edges, nextId];
+    }
+    console.log(result);
+    const [nodes, edges] = recurse(result[0][0]);
+
+    const nodesStr = nodes.map(({ id, label }) => `${id} [label="${label}"];`).join('\n  ');
+    const edgesStr = edges.map(({ from, to, label}) => `${from} -> ${to} [label="${label}"];`).join('\n  ');
+    const lines = [
+        'digraph g {',
+        '  graph [rankdir = "LR", nodesep=0.1, ranksep=0.3];' +
+        '  node [fontsize = "16", shape="record", height=0.1, color=lightblue2];',
+        '  edge [fontsize = "14"];',
+        `  ${nodesStr}`,
+        `  ${edgesStr}`,
+        '}',
+    ];
+
+    return lines.join('\n');
+}
+
+module.exports = { cardToGraphViz, parseCard };

@@ -19,7 +19,7 @@ const runService = (data) => {
 if (isMainThread) {
     const cpuCount = os.cpus().length;
 
-    carddb.initializeCardDb().then(async () => {
+    carddb.initializeCardDb('extern/CubeCobra/private', true).then(async () => {
         const successes = [];
         const ambiguous = [];
         const failures = [];
