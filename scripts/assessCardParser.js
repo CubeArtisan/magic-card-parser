@@ -1,9 +1,9 @@
-import os from 'os';
-import { isMainThread, parentPort, Worker, workerData } from 'worker_threads';
+const os = require('os');
+const { isMainThread, parentPort, Worker, workerData } = require('worker_threads');
 
-import { parseCard } from '../src/magicCardParser.js';
+const { parseCard } = require('../src/magicCardParser');
 
-import carddb from '../extern/CubeCobra/serverjs/cards.js';
+const carddb = require('../extern/CubeCobra/serverjs/cards');
 
 const runService = (data) => {
     return new Promise((resolve, reject) => {

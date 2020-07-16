@@ -1,8 +1,6 @@
-import nearley from 'nearley';
+const { Parser, Grammar } = require('nearley');
 
-import magicCardGrammar from './generated/magicCardGrammar.js';
-
-const { Parser, Grammar } = nearley;
+const magicCardGrammar = require('./generated/magicCardGrammar');
 
 const makeUnique = (lst) => {
     const seen = [];
@@ -19,7 +17,7 @@ const makeUnique = (lst) => {
 
 const compiledGrammar = Grammar.fromCompiled(magicCardGrammar);
 
-export const parseCard = (card) => {
+const parseCard = (card) => {
     const { name, oracle_text } = card;
     const magicCardParser = new Parser(compiledGrammar);
     const oracleText = oracle_text.split(name).join('~').toLowerCase();
@@ -40,4 +38,4 @@ export const parseCard = (card) => {
     return { result, error: null, oracleText, card };
 };
 
-export default { parseCard };
+module.exports = { parseCard };
