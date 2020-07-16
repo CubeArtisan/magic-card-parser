@@ -1,6 +1,6 @@
 {
   "name": "magic-card-parser",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "A utility for parsing magic cards into a JSON structure for further processing.",
   "main": "src/magicCardParser.js",
   "scripts": {
