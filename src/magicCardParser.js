@@ -1,6 +1,7 @@
 const { Parser, Grammar } = require('nearley');
 
 const magicCardGrammar = require('./generated/magicCardGrammar');
+const typeLineGrammar = require('./generated/typeLineGrammar');
 
 const makeUnique = (lst) => {
     const seen = [];
@@ -15,12 +16,15 @@ const makeUnique = (lst) => {
     return result;
 };
 
-const compiledGrammar = Grammar.fromCompiled(magicCardGrammar);
+const compiledMagicCardGrammar = Grammar.fromCompiled(magicCardGrammar);
+const compiledTypeLineGrammar = Grammar.fromCompiled(typeLineGrammar);
 
 const parseCard = (card) => {
     const { name, oracle_text } = card;
-    const magicCardParser = new Parser(compiledGrammar);
-    const oracleText = oracle_text.split(name).join('~').toLowerCase();
+    const magicCardParser = new Parser(compiledMagicCardGrammar);
+    const shortenedName = name.split(',')[0];
+    const oracleText = oracle_text.split(name).join('~').split(shortenedName).join('~').toLowerCase();
+
     try {
         magicCardParser.feed(oracleText);
     } catch (error) {
@@ -36,6 +40,27 @@ const parseCard = (card) => {
         return { result, error: 'Ambiguous parse', oracleText, card };
     }
     return { result, error: null, oracleText, card };
+};
+
+const parseTypeLine = (typeLine) => {
+    const typeLineParser = new Parser(compiledTypeLineGrammar);
+    try {
+        typeLineParser.feed(typeLine);
+    } catch (error) {
+        console.error(typeLine, error);
+        return { result: null, error, typeLine };
+    }
+
+    const { results } = typeLineParser;
+    const result = makeUnique(results);
+    if (result.length === 0) {
+        console.error(typeLine, "Incomplete parse");
+        return { result: null, error: 'Incomplete parse', typeLine };
+    }
+    if (result.length > 1) {
+        return { result, error: 'Ambiguous parse', typeLine };
+    }
+    return { result, error: null, typeLine };
 };
 
 const cardToGraphViz = (card) => {
@@ -73,7 +98,6 @@ const cardToGraphViz = (card) => {
         }
         return [nodes, edges, nextId];
     }
-    console.log(result);
     const [nodes, edges] = recurse(result[0][0]);
 
     const nodesStr = nodes.map(({ id, label }) => `${id} [label="${label}"];`).join('\n  ');
@@ -91,4 +115,4 @@ const cardToGraphViz = (card) => {
     return lines.join('\n');
 }
 
-module.exports = { cardToGraphViz, parseCard };
+module.exports = { cardToGraphViz, parseCard, parseTypeLine };

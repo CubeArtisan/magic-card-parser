@@ -1,7 +1,7 @@
 const os = require('os');
 const { isMainThread, parentPort, Worker, workerData } = require('worker_threads');
 
-const { parseCard } = require('../src/magicCardParser');
+const { parseCard, parseTypeLine } = require('../src/magicCardParser');
 
 const carddb = require('../extern/CubeCobra/serverjs/cards');
 
@@ -37,6 +37,9 @@ if (isMainThread) {
                 !typeLineLower.includes('hero') &&
                 !typeLineLower.includes('plane ') &&
                 !typeLineLower.includes('contraption ') &&
+                !typeLineLower.includes('emblem') &&
+                !typeLineLower.includes('token') &&
+                typeLineLower !== 'card' &&
                 set !== 'cmb1'
             ) {
                 oracleIds.push(oracle_id);
@@ -63,22 +66,26 @@ if (isMainThread) {
             card: { parsed_cost: parsedCost, power, toughness, loyalty, _id: cardID, name, type },
         } of results) {
             if (!error) {
+                try {
                 successes.push({
                     cardID,
                     name,
                     parsedCost,
-                    types: type.split(' — ').map((t) => t.split(' ')),
+                    typeLine: parseTypeLine(type.toLowerCase()).result[0],
                     parsed: result[0],
                     power,
                     toughness,
                     loyalty,
                 });
+                } catch (err) {
+                    console.error(name);
+                }
             } else if (result) {
                 ambiguous.push({
                     cardID,
                     name,
                     parsedCost,
-                    types: type.split(' — ').map((t) => t.split(' ')),
+                    typeLine: parseTypeLine(type.toLowerCase()).result[0],
                     oracleText,
                     parsed: result[0],
                     otherParses: result.slice(1),

@@ -1,3 +1,5 @@
+_ -> " ":?
+__ -> " "
 counterKind -> (ptModification
   | "acorn"
   | "age"
@@ -135,6 +137,33 @@ counterKind -> (ptModification
   | "winch"
   | "wind"
   | "wish") {% ([[counter]]) => counter %}
+superType -> ("basic"
+  | "legendary"
+  | "snow"
+  | "ongoing"
+  | "world") {% ([[t]]) => t %}
+subType -> (creatureType
+  | artifactType
+  | spellSubType
+  | enchantmentType
+  | planeswalkerType
+  | landType) {% ([[t]]) => t %}
+permanentTypeInner -> "artifact" {% () => "artifact" %}
+  | "creature" {% () => "creature" %}
+  | "enchantment" {% () => "enchantment" %}
+  | "land" {% () => "land" %}
+  | "planeswalker" {% () => "planeswalker" %}
+  | "basic" {% () => "basic" %}
+  | "permanent" {% () => "permanent" %}
+spellType -> "instant" {% () => "instant" %}
+  | "sorcery" {% () => "sorcery" %}
+  | "instant or sorcery" {% () => ({ or: ["instant", "sorcery"] }) %}
+permanentTypeSpecifierInner -> (permanentType
+  | creatureType
+  | artifactType
+  | enchantmentType
+  | planeswalkerType
+  | landType) {% ([[t]]) => t %}
 creatureType -> ("advisor"
   | "aetherborn"
   | "ally"
@@ -171,6 +200,7 @@ creatureType -> ("advisor"
   | "cat"
   | "centaur"
   | "cephalid"
+  | "chicken"
   | "chimera"
   | "citizen"
   | "cleric"
@@ -187,6 +217,7 @@ creatureType -> ("advisor"
   | "devil"
   | "dinosaur"
   | "djinn"
+  | "dog"
   | "dragon"
   | "drake"
   | "dreadnought"
@@ -231,7 +262,6 @@ creatureType -> ("advisor"
   | "homunculus"
   | "horror"
   | "horse"
-  | "hound"
   | "human"
   | "hydra"
   | "hyena"
@@ -449,7 +479,7 @@ landType -> (basicLandType
   | "mine"
   | "power-plant"
   | "tower"
-  | "urza's") {% ([[t]]) => t %}
+  | "urza" AP "s") {% ([[t]]) => t %}
 basicLandType -> ("plains"
   | "island"
   | "swamp"
@@ -468,3 +498,82 @@ artifactType -> ("clue"
   | "gold"
   | "treasure"
   | "vehicle") {% ([[t]]) => t %}
+spellSubType -> ("adventure"
+  | "trap"
+  | "arcane") {% ([[t]]) => t %}
+type -> (permanentTypeInner
+  | spellType
+  | "tribal"
+  | "conspiracy"
+  | "plane"
+  | "phenomena"
+  | "emblem") {% ([[t]]) => t %}
+
+abilityWord ->  ("adamant"
+  | "addendum"
+  | "battalion"
+  | "bloodrush"
+  | "channel"
+  | "chroma"
+  | "cohort"
+  | "constellation"
+  | "converge"
+  | "council's dilemma"
+  | "delirium"
+  | "domain"
+  | "eminence"
+  | "enrage"
+  | "fateful hour"
+  | "ferocious"
+  | "formidable"
+  | "grandeur"
+  | "hellbent"
+  | "heroic"
+  | "imprint"
+  | "inspired"
+  | "join forces"
+  | "kinship"
+  | "landfall"
+  | "lieutenant"
+  | "metalcraft"
+  | "morbid"
+  | "parley"
+  | "radiance"
+  | "raid"
+  | "rally"
+  | "revolt"
+  | "spell mastery"
+  | "strive"
+  | "sweep"
+  | "temptingoffer"
+  | "threshold"
+  | "undergrowth"
+  | "will of the council") {% ([[aw]]) => aw %}
+
+AP -> "'" | "’"
+CARD_NAME -> "~" {% () => "CARD_NAME" %}
+CAN_T -> "can't" | "can’t"
+DON_T -> "don't" | "don’t"
+DOESN_T -> "doesn't" | "doesn’t"
+DASHDASH -> "-" | "--" | "—"
+ISN_T -> "isn't" | "isn’t"
+IT_S -> "it's" | "it’s"
+PLUSMINUS -> "+" | "-" | "−"
+SAXON -> AP "s"
+THAT_S -> "that's" | "that’s"
+WEREN_T -> "weren't" | "weren’t"
+YOU_VE -> "you've" | "you’ve"
+
+partOfTurn -> "turn" {% () => "turn" %}
+  | "untap step" {% () => "untap" %}
+  | "upkeep" {% () => "upkeep" %}
+  | "draw step" {% () => "drawStep" %}
+  | "precombat main phase" {% () => "precombatMain" %}
+  | "main phase" {% () => "main" %}
+  | "combat" {% () => "combat" %}
+  | "declare attackers" {% () => "declareAttackers" %}
+  | "declare blockers" {% () => "declareBlockers" %}
+  | "combat damage step" {% () => "combatDamage" %}
+  | "end of combat" {% () => "endCombat" %}
+  | "postcombat main phase" {% () => "postcombatMain" %}
+  | "end step" {% () => "end" %}

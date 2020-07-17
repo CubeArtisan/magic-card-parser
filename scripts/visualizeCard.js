@@ -11,7 +11,6 @@ carddb.initializeCardDb('extern/CubeCobra/private', true).then(async () => {
         const card = cards[Math.floor(Math.random() * cards.length)];
         script = cardToGraphViz(card);
     }
-    console.log(script);
     try {
         const graph = await new Promise((resolve, reject) => graphviz.parse(script, resolve, (code, out, err) => reject([code, out, err])));
         graph.output('svg', 'cardVisualization.svg');
