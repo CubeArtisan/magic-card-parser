@@ -1,11 +1,15 @@
+const fs = require('fs');
 const graphviz = require('graphviz');
-
-const carddb = require('../extern/CubeCobra/serverjs/cards');
 
 const { cardToGraphViz } = require('../src/magicCardParser');
 
-carddb.initializeCardDb('extern/CubeCobra/private', true).then(async () => {
-    const cards = carddb.allCards();
+if (!fs.existsSync('./oracle_cards.json')) {
+    console.error("oracle_cards.json does not exist, run 'npm run fetch' to download it");
+    return;
+}
+
+(async () => {
+    const cards = JSON.parse(fs.readFileSync('./oracle_cards.json'));
     let script = null;
     while (script === null) {
         const card = cards[Math.floor(Math.random() * cards.length)];
@@ -17,4 +21,4 @@ carddb.initializeCardDb('extern/CubeCobra/private', true).then(async () => {
     } catch(err) {
         console.error(err);
     }
-})
+})()
