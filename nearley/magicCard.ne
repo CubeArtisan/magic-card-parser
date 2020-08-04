@@ -784,6 +784,21 @@ color -> "white" {% () => "w" %}
 
 pt -> number "/" number {% ([power, , toughness]) => ({ power, toughness }) %}
 ptModification -> PLUSMINUS number "/" PLUSMINUS number {% ([pmP, power, , pmT, toughness]) => ({ powerMod: '+' === pmP.toString() ? power : -power, toughnessMod: '+' === pmT.toString() ? toughness : -toughness }) %}
+valueExpression -> englishNumber {% ([count]) => ({ count }) %}
+  | frequency {% ([frequency]) => ({ frequency }) %}
+  | ordinal {% ([ordinal]) => ({ ordinal }) %}
+  | comparisonExpression {% ([c]) => c %}
+  | valueFormulaExpression {% ([f]) => f %}
+valueFormulaExpression -> "up to" __ valueExpression {% ([, , lte]) => ({ lte }) %}
+  | ("a" | "the" | "any") __ "number of" __ (valueExpression | anyEntity) {% ([, , , , [count]) => ({ count }) %}
+  | (englishNumber __ "times"):? __ "that" __ ("much" | "many") #TODO: ASTize
+  | valueExpression __ "rounded up" {% ([roundUp]) => ({ roundUp }) %}
+  | valueExpression __ "rounded down" {% ([roundDown]) => ({ roundDown }) %}
+  | valueExpression __ "divided evenly" {% ([divideEvenly]) => ({ divideEvenly }) %}
+  | valueExpression __ "divided as you choose" {% ([chooseDivide]) => ({ chooseDivide }) %}
+  | valueExpression __ "plus" __ valueExpression {% ([p1, , , , p2]) => ({ plus: [p1, p2]}) %}
+  | valueExpression __ "minus" __ valueExpression {% ([m1, , , , m2]) => ({ minus: [m1, m2]}) %}
+
 numberDefinition -> itsPossessive __ numericalCharacteristic {% ([whose, , characteristic]) => ({ whose, characteristic }) %}
   | "the" __ ("total" __):? "number of" __ object {% ([, , , , , count]) => ({ count }) %}
   | "the total" __ numericalCharacteristic __ "of" __ object {% ([, , total, , , , whose]) => ({ total, whose }) %}
@@ -878,11 +893,12 @@ zone -> (playersPossessive | "a" (__ "single"):?) __ ownedZone {% ([[owner], , z
   | "the battlefield" {% () => "battlefield" %}
   | "it" {% () => "it" %}
   | "anywhere" {% () => "anywhere" %}
-ownedZone -> "graveyard" {% () => "graveyard" %}
+  | "outside of the game" {% () => "sideboard" %}
+  | "the stack" {% () => "stack" %}
+ownedZone -> "graveyard" "s":? {% () => "graveyard" %}
   | "library" {% () => "library" %}
   | "libraries" {% () => "library" %}
-  | "hand" {% () => "hand" %}
-  | ownedZone "s" {% ([z]) => z %}
+  | "hand" "s":? {% () => "hand" %}
   | connected[ownedZone] {% ([c]) => c %}
 intoZone -> "onto the battlefield" {% () => "battlefield" %}
   | "into" __ zone {% ([, , into]) => into %}
