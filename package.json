@@ -7,6 +7,7 @@
     "build": "sh nearley/helper.sh",
     "clean": "rm -r src/generated",
     "assess": "npm run build && node --max-old-space-size=8192 scripts/assessCardParser.js",
+    "fetch": "node scripts/fetchCards.js",
     "visualize": "npm run build && node scripts/visualizeCard.js",
     "generate": "npm run build && node --max-old-space-size=30720 node_modules/nearley/bin/nearley-unparse.js src/generated/magicCardGrammar.js -n 5",
     "railroad": "nearley-railroad nearley/magicCard.ne > railroad.html"

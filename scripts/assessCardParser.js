@@ -1,9 +1,13 @@
+const fs = require('fs');
 const os = require('os');
 const { isMainThread, parentPort, Worker, workerData } = require('worker_threads');
 
 const { parseCard, parseTypeLine } = require('../src/magicCardParser');
 
-const carddb = require('../extern/CubeCobra/serverjs/cards');
+if (!fs.existsSync('./oracle_cards.json')) {
+    console.error("oracle_cards.json does not exist, run 'npm run fetch' to download it");
+    return;
+}
 
 const runService = (data) => {
     return new Promise((resolve, reject) => {
@@ -19,19 +23,17 @@ const runService = (data) => {
 if (isMainThread) {
     const cpuCount = os.cpus().length;
 
-    carddb.initializeCardDb('extern/CubeCobra/private', true).then(async () => {
+    const cards = JSON.parse(fs.readFileSync('./oracle_cards.json'));
+
+    (async () => {
         const successes = [];
         const ambiguous = [];
         const failures = [];
-        const cards = carddb.allCards();
-        const oracleIds = [];
-        const validCards = cards.filter(({ isToken, oracle_id, border_color: borderColor, type, set }) => {
-            const typeLineLower = type && type.toLowerCase();
+        const validCards = cards.filter(({ layout, oracle_id, border_color: borderColor, type_line: type, set }) => {
+            const typeLineLower = type.toLowerCase();
             if (
-                !isToken &&
-                !oracleIds.includes(oracle_id) &&
+                layout != 'token' &&
                 borderColor !== 'silver' &&
-                type &&
                 !typeLineLower.includes('vanguard') &&
                 !typeLineLower.includes('conspiracy') &&
                 !typeLineLower.includes('hero') &&
@@ -42,7 +44,6 @@ if (isMainThread) {
                 typeLineLower !== 'card' &&
                 set !== 'cmb1'
             ) {
-                oracleIds.push(oracle_id);
                 return true;
             }
             return false;
@@ -63,14 +64,14 @@ if (isMainThread) {
             result,
             error,
             oracleText,
-            card: { parsed_cost: parsedCost, power, toughness, loyalty, _id: cardID, name, type },
+            card: { mana_cost: manaCost, power, toughness, loyalty, id: cardID, name, type_line: type },
         } of results) {
             if (!error) {
                 try {
                 successes.push({
                     cardID,
                     name,
-                    parsedCost,
+                    manaCost,
                     typeLine: parseTypeLine(type.toLowerCase()).result[0],
                     parsed: result[0],
                     power,
@@ -84,7 +85,7 @@ if (isMainThread) {
                 ambiguous.push({
                     cardID,
                     name,
-                    parsedCost,
+                    manaCost,
                     typeLine: parseTypeLine(type.toLowerCase()).result[0],
                     oracleText,
                     parsed: result[0],
@@ -100,10 +101,10 @@ if (isMainThread) {
         console.info('successes', successes.length);
         // console.debug(
         //   JSON.stringify(
-        //     successes.concat(ambiguous).map(({ cardID, name, parsedCost, types, parsed, power, toughness, loyalty }) => ({
+        //     successes.concat(ambiguous).map(({ cardID, name, manaCost, types, parsed, power, toughness, loyalty }) => ({
         //       cardID,
         //       name,
-        //       parsedCost,
+        //       manaCost,
         //       types,
         //       parsed,
         //       power,
@@ -127,8 +128,7 @@ if (isMainThread) {
             '/',
             successes.length + ambiguous.length + failures.length,
         );
-    });
-    carddb.unloadCardDb();
+    })();
 } else {
     const result = workerData.map(parseCard);
     parentPort.postMessage(JSON.stringify(result));

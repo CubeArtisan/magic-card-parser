@@ -20,7 +20,13 @@ const compiledMagicCardGrammar = Grammar.fromCompiled(magicCardGrammar);
 const compiledTypeLineGrammar = Grammar.fromCompiled(typeLineGrammar);
 
 const parseCard = (card) => {
-    const { name, oracle_text } = card;
+    const { name, oracle_text, layout } = card;
+
+    if (layout != 'normal') {
+        // https://scryfall.com/docs/api/layouts
+        return { parsed: null, error: 'Currently only support normal layout', oracleText: oracle_text, card };
+    }
+
     const magicCardParser = new Parser(compiledMagicCardGrammar);
     const shortenedName = name.split(',')[0];
     const oracleText = oracle_text.split(name).join('~').split(shortenedName).join('~').toLowerCase();

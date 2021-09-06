@@ -5,3 +5,4 @@ incorrect.json
 .idea/
 private/
 src/generated/
+/oracle_cards.json
