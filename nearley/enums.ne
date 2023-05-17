@@ -506,7 +506,8 @@ type -> (permanentTypeInner
   | "tribal"
   | "conspiracy"
   | "plane"
-  | "phenomena"
+  | "phenomenon"
+  | "scheme"
   | "emblem") {% ([[t]]) => t %}
 
 abilityWord ->  ("adamant"

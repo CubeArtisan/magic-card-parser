@@ -30,17 +30,17 @@ if (isMainThread) {
             if (
                 !isToken &&
                 !oracleIds.includes(oracle_id) &&
-                borderColor !== 'silver' &&
-                type &&
-                !typeLineLower.includes('vanguard') &&
-                !typeLineLower.includes('conspiracy') &&
-                !typeLineLower.includes('hero') &&
-                !typeLineLower.includes('plane ') &&
-                !typeLineLower.includes('contraption ') &&
-                !typeLineLower.includes('emblem') &&
+                // borderColor !== 'silver' &&
+                typeLineLower &&
+                // !typeLineLower.includes('vanguard') &&
+                // !typeLineLower.includes('conspiracy') &&
+                // !typeLineLower.includes('hero') &&
+                // !typeLineLower.includes('plane ') &&
+                // !typeLineLower.includes('contraption ') &&
+                // !typeLineLower.includes('emblem') &&
                 !typeLineLower.includes('token') &&
-                typeLineLower !== 'card' &&
-                set !== 'cmb1'
+                typeLineLower !== 'card' // &&
+                // set !== 'cmb1'
             ) {
                 oracleIds.push(oracle_id);
                 return true;
@@ -63,70 +63,55 @@ if (isMainThread) {
             result,
             error,
             oracleText,
-            card: { parsed_cost: parsedCost, power, toughness, loyalty, _id: cardID, name, type },
+            card: { parsed_cost: parsedCost, power, toughness, loyalty, name_lower, type },
         } of results) {
+            const typeLineLower = type.toLowerCase();
+            const typeLine = parseTypeLine(typeLineLower).result || typeLineLower;
+            const cardDetails = { parsedCost, typeLine };
+            if (power || power === 0) {
+                cardDetails.power = power;
+            }
+            if (toughness || toughness === 0) {
+                cardDetails.toughness = toughness;
+            }
+            if (loyalty || loyalty === 0) {
+                cardDetails.loyalty = loyalty;
+            }
             if (!error) {
-                try {
-                successes.push({
-                    cardID,
-                    name,
-                    parsedCost,
-                    typeLine: parseTypeLine(type.toLowerCase()).result[0],
+                successes.push([name_lower, {
+                    ...cardDetails,
                     parsed: result[0],
-                    power,
-                    toughness,
-                    loyalty,
-                });
-                } catch (err) {
-                    console.error(name);
-                }
+                }]);
             } else if (result) {
-                ambiguous.push({
-                    cardID,
-                    name,
-                    parsedCost,
-                    typeLine: parseTypeLine(type.toLowerCase()).result[0],
-                    oracleText,
+                ambiguous.push([name_lower, {
+                    ...cardDetails,
                     parsed: result[0],
                     otherParses: result.slice(1),
-                    power,
-                    toughness,
-                    loyalty,
-                });
+                }]);
             } else {
-                failures.push({ name, oracleText, error });
+                failures.push([name_lower, {
+                    ...cardDetails,
+                    oracleText,
+                }]);
             }
         }
-        console.info('successes', successes.length);
-        // console.debug(
-        //   JSON.stringify(
-        //     successes.concat(ambiguous).map(({ cardID, name, parsedCost, types, parsed, power, toughness, loyalty }) => ({
-        //       cardID,
-        //       name,
-        //       parsedCost,
-        //       types,
-        //       parsed,
-        //       power,
-        //       toughness,
-        //       loyalty,
-        //     })),
-        //   ),
-        // );
-        console.info('ambiguous', ambiguous.length);
+        // console.info('successes', successes.length);
+        console.debug(JSON.stringify(Object.fromEntries(successes.concat(ambiguous, failures))));
+        // console.info('ambiguous', ambiguous.length);
         for (let i = 0; i < 1; i++) {
-            console.info(JSON.stringify(ambiguous[Math.floor(Math.random() * ambiguous.length)], null, 2));
+            // console.info(JSON.stringify(ambiguous[Math.floor(Math.random() * ambiguous.length)], null, 2));
         }
-        console.info('failures', failures.length);
+        // console.info('failures', failures.length);
         for (let i = 0; i < 8; i++) {
-            console.info(JSON.stringify(failures[Math.floor(Math.random() * failures.length)]));
+            // console.info(JSON.stringify(failures[Math.floor(Math.random() * failures.length)]));
         }
         // console.debug(failures.join('\n,'));
-        console.info(
-            'parse rate',
-            successes.length + ambiguous.length,
-            '/',
-            successes.length + ambiguous.length + failures.length,
-        );
+        // console.info(
+        //     'parse rate',
+        //     successes.length + ambiguous.length,
+        //     '/',
+        //     successes.length + ambiguous.length + failures.length,
+        // );
     });
     carddb.unloadCardDb();
 } else {
